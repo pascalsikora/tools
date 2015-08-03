@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Measuring tool to verify the script execution time and memory consumption
  *
@@ -7,22 +8,29 @@
  * @author     Paweł Sikora <pascal.sikora@gmail.com>
  * @version 1.0
  */
-class ResourceMeter{
+class ResourceMeter
+{
     /**
+     * Counter - time format helper to do some math
+     *
      * @var array
      */
-    private static $times = array(
-      'hour'   => 3600000,
-      'minute' => 60000,
-      'second' => 1000
+    private $times = array(
+        'hour' => 3600000,
+        'minute' => 60000,
+        'second' => 1000
     );
 
     /**
+     * Counter - measure time from started part
+     *
      * @var float
      */
-   private $startPartTime;
+    private $startPartTime;
 
     /**
+     * Counter - Measure request time
+     *
      * @var float
      */
     private $requestTime;
@@ -30,18 +38,24 @@ class ResourceMeter{
     /**
      * Constructor
      */
-    public function __construct(){
+    public function __construct()
+    {
 
         $this->start();
     }
 
 
-    public function start(){
+    /**
+     * Do the start logic
+     * - start counters
+     */
+    public function start()
+    {
 
         if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
             $this->requestTime = $_SERVER['REQUEST_TIME_FLOAT'];
             $this->startPartTime = $_SERVER['REQUEST_TIME_FLOAT'];
-        }else {
+        } else {
             $this->requestTime = microtime(TRUE);
             $this->startPartTime = microtime(TRUE);
         }
@@ -49,12 +63,13 @@ class ResourceMeter{
 
 
     /**
-     * Starts the timer.
+     * Starts the part timer
      */
-    public function startPart(){
+    public function startPart()
+    {
 
-         $this->startPartTime = microtime(TRUE);
-         return true;
+        $this->startPartTime = microtime(TRUE);
+        return true;
     }
 
 
@@ -64,11 +79,12 @@ class ResourceMeter{
      * @param  float $time
      * @return string
      */
-    public function secondsToTimeString($time){
+    public function secondsToTimeString($time)
+    {
 
         $ms = round($time * 1000);
 
-        foreach (self::$times as $unit => $value) {
+        foreach ($this->times as $unit => $value) {
             if ($ms >= $value) {
                 $time = floor($ms / $value * 100.0) / 100.0;
                 return $time . ' ' . ($time == 1 ? $unit : $unit . 's');
@@ -79,14 +95,15 @@ class ResourceMeter{
     }
 
     /**
-     * Return human redable memory size
-     * 
+     * Return human readable memory size
+     *
      * @param integer $size
      */
-    private function memoryToString($size){
+    private function memoryToString($size)
+    {
 
-        $unit=array('b','kb','mb','gb','tb','pb');
-        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+        $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
+        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 
     }
 
@@ -95,7 +112,8 @@ class ResourceMeter{
      *
      * @return string
      */
-    public function timeSincePartOfRequest(){
+    public function timeSincePartOfRequest()
+    {
 
         return $this->secondsToTimeString(microtime(TRUE) - $this->startPartTime);
     }
@@ -105,7 +123,8 @@ class ResourceMeter{
      *
      * @return string
      */
-    public function timeSinceStartOfRequest(){
+    public function timeSinceStartOfRequest()
+    {
 
         return $this->secondsToTimeString(microtime(TRUE) - $this->requestTime);
     }
@@ -117,13 +136,14 @@ class ResourceMeter{
      *
      * @return string
      */
-    public function resourcePartUsage(){
+    public function resourcePartUsage()
+    {
 
         $toReturn = sprintf(
-          'Part time: %s, Memory: %4.2fMb, Memory in peak: %4.2fMb',
-          $this->timeSincePartOfRequest(),
-          $this->memoryToString(memory_get_usage(TRUE)),
-          $this->memoryToString(memory_get_peak_usage(TRUE))
+            'Part time: %s, Memory: %4.2fMb, Memory in peak: %4.2fMb',
+            $this->timeSincePartOfRequest(),
+            $this->memoryToString(memory_get_usage(TRUE)),
+            $this->memoryToString(memory_get_peak_usage(TRUE))
         );
 
         $this->startPart();
@@ -137,17 +157,17 @@ class ResourceMeter{
      *
      * @return string
      */
-    public function resourceUsage(){
+    public function resourceUsage()
+    {
 
         return sprintf(
-          'Time: %s, Memory: %4.2fMb, Memory in peak: %4.2fMb',
-          $this->timeSinceStartOfRequest(),
-          $this->memoryToString(memory_get_usage(TRUE)),
-          $this->memoryToString(memory_get_peak_usage(TRUE))
+            'Time: %s, Memory: %4.2fMb, Memory in peak: %4.2fMb',
+            $this->timeSinceStartOfRequest(),
+            $this->memoryToString(memory_get_usage(TRUE)),
+            $this->memoryToString(memory_get_peak_usage(TRUE))
         );
 
     }
 
-    
-    
+
 }
